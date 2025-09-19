@@ -16,7 +16,7 @@ from telegram.ext import (
 )
 
 # === BOT TOKEN VA ADMIN ID ===
-BOT_TOKEN = "8290213646:AAFuNi6cb-Utic4cYH22x7bB7rMXJM"
+BOT_TOKEN = ""
 ADMIN_CHAT_ID = 5923083865
 
 # === LOGGING ===
@@ -272,4 +272,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
