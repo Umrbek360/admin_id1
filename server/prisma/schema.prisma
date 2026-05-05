@@ -1,0 +1,47 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum Role { super_admin admin waiter }
+enum OrderStatus { new preparing ready served cancelled }
+enum PaymentStatus { unpaid cash_collected paid }
+enum TableStatus { empty busy reserved }
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  passwordHash String
+  role Role
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders Order[] @relation("WaiterOrders")
+}
+model Category { id Int @id @default(autoincrement()); name String @unique; description String?; sortOrder Int @default(0); isActive Boolean @default(true); products Product[]; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt }
+model Product { id Int @id @default(autoincrement()); categoryId Int; category Category @relation(fields:[categoryId], references:[id]); name String; description String?; price Int; imageUrl String?; isAvailable Boolean @default(true); isPopular Boolean @default(false); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; items OrderItem[] }
+model Table { id Int @id @default(autoincrement()); tableNumber String @unique; status TableStatus @default(empty); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt }
+model Order {
+ id Int @id @default(autoincrement())
+ orderNumber String @unique
+ tableNumber String
+ waiterId Int
+ waiterName String
+ waiter User @relation("WaiterOrders", fields:[waiterId], references:[id])
+ status OrderStatus @default(new)
+ paymentMethod String @default("cash")
+ paymentStatus PaymentStatus @default(unpaid)
+ cashCollectedByWaiterId Int?
+ cashCollectedByWaiterName String?
+ cashCollectedAt DateTime?
+ cashCollectionNote String?
+ paymentVerifiedByAdminId Int?
+ paymentVerifiedByAdminName String?
+ paymentVerifiedAt DateTime?
+ totalPrice Int
+ note String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ items OrderItem[]
+}
+model OrderItem { id Int @id @default(autoincrement()); orderId Int; order Order @relation(fields:[orderId], references:[id], onDelete: Cascade); productId Int; product Product @relation(fields:[productId], references:[id]); productName String; quantity Int; unitPrice Int; totalPrice Int }
+model Setting { id Int @id @default(1); restaurantName String; phone String; address String; workingHours String; currency String @default("UZS"); serviceFeePercent Int @default(0); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt }
